@@ -53,7 +53,7 @@ async function getPatientMedicalHistory(patientId) {
   );
   const [prescriptions] = await pool.query(
     `SELECT pr.prescription_id, pr.prescribed_at, pr.notes,
-            JSON_ARRAYAGG(JSON_OBJECT('medicine', m.name, 'dosage', pi.dosage, 'duration_days', pi.duration_days, 'status', pi.dispensed_status)) AS items
+            json_agg(json_build_object('medicine', m.name, 'dosage', pi.dosage, 'duration_days', pi.duration_days, 'status', pi.dispensed_status)) AS items
      FROM prescriptions pr
      JOIN prescription_items pi ON pi.prescription_id = pr.prescription_id
      JOIN medicines m ON m.medicine_id = pi.medicine_id

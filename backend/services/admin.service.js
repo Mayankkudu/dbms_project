@@ -5,7 +5,7 @@ async function getSummaryStats() {
   const [[{ activeAdmissions }]] = await pool.query(`SELECT COUNT(*) AS activeAdmissions FROM admissions WHERE status='ACTIVE'`);
   const [[{ availableBeds }]] = await pool.query(`SELECT COUNT(*) AS availableBeds FROM beds WHERE status='AVAILABLE'`);
   const [[{ todaysAppointments }]] = await pool.query(
-    `SELECT COUNT(*) AS todaysAppointments FROM appointments WHERE DATE(scheduled_at) = CURDATE()`
+    `SELECT COUNT(*) AS todaysAppointments FROM appointments WHERE CAST(scheduled_at AS DATE) = CURRENT_DATE`
   );
   const [[{ openCriticalAlerts }]] = await pool.query(`SELECT COUNT(*) AS openCriticalAlerts FROM critical_alerts WHERE status='OPEN'`);
   const [[{ totalStaff }]] = await pool.query(`SELECT COUNT(*) AS totalStaff FROM staff`);
@@ -20,8 +20,8 @@ async function getSummaryStats() {
 
 async function getRegistrationsByDay() {
   const [rows] = await pool.query(
-    `SELECT DATE(pt.registered_at) AS day, COUNT(*) AS count
-     FROM patients pt GROUP BY DATE(pt.registered_at) ORDER BY day`
+    `SELECT CAST(pt.registered_at AS DATE) AS day, COUNT(*) AS count
+     FROM patients pt GROUP BY CAST(pt.registered_at AS DATE) ORDER BY day`
   );
   return rows;
 }
@@ -37,8 +37,8 @@ async function getPatientsByDepartment() {
 
 async function getAlertsOverTime() {
   const [rows] = await pool.query(
-    `SELECT DATE(generated_at) AS day, severity, COUNT(*) AS count
-     FROM critical_alerts GROUP BY DATE(generated_at), severity ORDER BY day`
+    `SELECT CAST(generated_at AS DATE) AS day, severity, COUNT(*) AS count
+     FROM critical_alerts GROUP BY CAST(generated_at AS DATE), severity ORDER BY day`
   );
   return rows;
 }

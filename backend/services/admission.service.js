@@ -11,9 +11,7 @@ const pool = require('../config/db');
 async function admitPatient({ patientId, bedId, doctorId, reason }) {
   const conn = await pool.getConnection();
   try {
-    await conn.query(`CALL admit_patient(?, ?, ?, ?, @out_id)`, [patientId, bedId, doctorId, reason]);
-    const [rows] = await conn.query(`SELECT @out_id AS admissionId`);
-    return rows[0].admissionId;
+    const [rows] = await conn.query(`SELECT admit_patient(?, ?, ?, ?) AS "admissionId"`, [patientId, bedId, doctorId, reason]); return rows[0].admissionId;
   } finally {
     conn.release();
   }

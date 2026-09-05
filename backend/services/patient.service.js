@@ -108,12 +108,7 @@ async function searchPatients({ name, phone } = {}) {
 async function registerPatient({ firstName, lastName, dob, gender, phone, email, username, passwordHash }) {
   const conn = await pool.getConnection();
   try {
-    await conn.query(
-      `CALL register_patient(?, ?, ?, ?, ?, ?, ?, ?, @out_id)`,
-      [firstName, lastName, dob, gender, phone, email, username, passwordHash]
-    );
-    const [rows] = await conn.query(`SELECT @out_id AS patientId`);
-    return rows[0].patientId;
+    const [rows] = await conn.query(`SELECT register_patient(?, ?, ?, ?, ?, ?, ?, ?) AS "patientId"`, [firstName, lastName, dob, gender, phone, email, username, passwordHash]); return rows[0].patientId;
   } finally {
     conn.release();
   }

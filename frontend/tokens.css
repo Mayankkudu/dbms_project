@@ -1,0 +1,72 @@
+:root {
+  --color-bg: #F6F8F8;
+  --color-surface: #FFFFFF;
+  --color-primary: #0F6B5C;
+  --color-primary-dark: #0B2B32;
+  --color-primary-light: #E4F0EE;
+  --color-critical: #D64545;
+  --color-critical-light: #FBEAEA;
+  --color-warning: #E2A33D;
+  --color-warning-light: #FBF2E2;
+  --color-success: #2F9E63;
+  --color-success-light: #E7F6EE;
+  --color-text: #16232A;
+  --color-text-muted: #5B6B73;
+  --color-border: #E2E6E8;
+
+  --font-display: 'Manrope', 'Segoe UI', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 1px 2px rgba(11, 43, 50, 0.06);
+  --shadow-md: 0 4px 16px rgba(11, 43, 50, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Falls back gracefully to system sans-serif if Google Fonts can't load
+   (offline environments, restrictive network policies, etc.) — the app
+   never depends on the web font request succeeding. */
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  margin: 0 0 0.4em 0;
+  letter-spacing: -0.01em;
+}
+
+a { color: var(--color-primary); }
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

@@ -1,0 +1,11 @@
+const express = require('express');
+const { asyncHandler } = require('../utils/asyncHandler');
+const { authenticate, authorize } = require('../middleware/auth.middleware');
+const controller = require('../controllers/billing.controller');
+const router = express.Router();
+router.use(authenticate);
+router.post('/', authorize('RECEPTIONIST', 'ADMIN'), asyncHandler(controller.createBill));
+router.get('/:billId', authorize('PATIENT', 'RECEPTIONIST', 'ADMIN'), asyncHandler(controller.getBill));
+router.get('/patient/:patientId', authorize('PATIENT', 'RECEPTIONIST', 'ADMIN'), asyncHandler(controller.listForPatient));
+router.post('/:billId/payments', authorize('RECEPTIONIST', 'ADMIN', 'PATIENT'), asyncHandler(controller.pay));
+module.exports = router;

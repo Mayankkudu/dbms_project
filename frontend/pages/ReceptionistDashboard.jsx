@@ -48,6 +48,7 @@ export default function ReceptionistDashboard() {
       scheduledAt: apptTime, reason: apptReason,
     });
     setMsg('Appointment booked.');
+    alert('Appointment booked successfully!');
     setApptTime(''); setApptReason('');
   }
 
@@ -60,6 +61,7 @@ export default function ReceptionistDashboard() {
         doctorId: admitDoctorId, reason: admitReason,
       });
       setMsg('Patient admitted.');
+      alert('Admitted successfully!');
       setAdmitBedId(''); setAdmitReason('');
       loadAll();
     } catch (err) {
@@ -73,6 +75,7 @@ export default function ReceptionistDashboard() {
     try {
       const p = await patientApi.register(regForm);
       setRegMsg(`Registered ${p.data.first_name} ${p.data.last_name}.`);
+      alert('Registered successfully!');
       setRegForm({ firstName: '', lastName: '', dob: '', gender: 'MALE', phone: '', email: '', username: '', password: '' });
     } catch (err) {
       setRegMsg(err.response?.data?.error || 'Registration failed.');

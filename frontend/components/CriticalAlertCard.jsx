@@ -41,14 +41,16 @@ function ExplainabilityStrip({ vitals, riskScore }) {
 export default function CriticalAlertCard({ alert, onAcknowledge, acknowledging }) {
   return (
     <div
+      className="hms-fade-in"
       style={{
-        background: 'var(--color-surface)',
+        background: 'linear-gradient(180deg, var(--color-critical-light) 0%, var(--color-surface) 18%)',
         border: '1px solid var(--color-border)',
         borderLeft: `4px solid var(--color-critical)`,
         borderRadius: 'var(--radius-md)',
         boxShadow: 'var(--shadow-sm)',
         padding: 16,
         marginBottom: 12,
+        transition: 'box-shadow 200ms var(--ease), transform 200ms var(--ease)',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -58,25 +60,23 @@ export default function CriticalAlertCard({ alert, onAcknowledge, acknowledging 
             SpO2 {alert.spo2}% · HR {alert.heart_rate} bpm · BP {alert.systolic_bp}/{alert.diastolic_bp}
           </div>
         </div>
-        <StatusBadge status={alert.severity} />
+        <StatusBadge status={alert.severity} pulse />
       </div>
 
       <ExplainabilityStrip vitals={alert} riskScore={alert.risk_score} />
 
-      <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 8, fontStyle: 'italic' }}>
+      <div style={{ fontSize: 11, color: 'var(--color-text-faint)', marginTop: 8, fontStyle: 'italic' }}>
         Demo/educational thresholds only — not a medical diagnosis.
       </div>
 
       {onAcknowledge && (
         <button
+          className="hms-btn hms-btn-primary"
           onClick={() => onAcknowledge(alert.alert_id)}
           disabled={acknowledging}
-          style={{
-            marginTop: 12, padding: '8px 16px', background: 'var(--color-primary)', color: 'white',
-            border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 600, fontSize: 13,
-          }}
+          style={{ marginTop: 12, width: '100%' }}
         >
-          {acknowledging ? 'Acknowledging…' : 'Acknowledge alert'}
+          {acknowledging ? 'Acknowledging…' : '✓ Acknowledge alert'}
         </button>
       )}
     </div>

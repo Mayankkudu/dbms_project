@@ -20,23 +20,32 @@ const TONE_STYLES = {
   muted: { bg: '#EEF1F2', fg: 'var(--color-text-muted)' },
 };
 
-export default function StatusBadge({ status }) {
-  const tone = TONE_STYLES[TONE_MAP[status] || 'muted'];
+export default function StatusBadge({ status, pulse }) {
+  const toneName = TONE_MAP[status] || 'muted';
+  const tone = TONE_STYLES[toneName];
+  const isCritical = toneName === 'critical';
   return (
     <span
       style={{
-        display: 'inline-block',
-        padding: '3px 10px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '3px 10px 3px 8px',
         borderRadius: 999,
-        fontSize: 12,
-        fontWeight: 600,
-        letterSpacing: '0.02em',
+        fontSize: 11.5,
+        fontWeight: 700,
+        letterSpacing: '0.03em',
+        textTransform: 'uppercase',
         background: tone.bg,
         color: tone.fg,
         whiteSpace: 'nowrap',
       }}
     >
-      {status}
+      <span
+        className={pulse || isCritical ? 'hms-pulse-dot' : ''}
+        style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', color: tone.fg, flexShrink: 0 }}
+      />
+      {status?.replace(/_/g, ' ')}
     </span>
   );
 }

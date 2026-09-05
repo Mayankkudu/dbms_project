@@ -76,7 +76,7 @@ export default function DoctorDashboard() {
 
   return (
     <DashboardLayout title="Doctor Dashboard">
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }} className="hms-fade-in">
         <Card title={`Open Critical Alerts (${alerts.length})`}>
           {alerts.length === 0 ? <EmptyState message="No open alerts." /> :
             alerts.map((a) => (
@@ -86,7 +86,7 @@ export default function DoctorDashboard() {
 
         <Card title="My Appointments">
           {appointments.length === 0 ? <EmptyState message="No appointments." /> : (
-            <table>
+            <table className="hms-table">
               <thead><tr><Th>Patient</Th><Th>When</Th><Th>Status</Th></tr></thead>
               <tbody>
                 {appointments.map((a) => (
@@ -104,15 +104,17 @@ export default function DoctorDashboard() {
 
       <Card title="Patient Lookup & Clinical Notes">
         <input
+          className="hms-input"
           placeholder="Search patient by name…"
           onChange={(e) => doSearch(e.target.value)}
-          style={{ width: 280, padding: '8px 10px', border: '1px solid var(--color-border)', borderRadius: 6, fontSize: 13, marginBottom: 12 }}
+          style={{ maxWidth: 320, marginBottom: 14 }}
         />
         {searchResults.length > 0 && (
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
             {searchResults.map((p) => (
               <button key={p.patient_id} onClick={() => selectPatient(p.patient_id)}
-                style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid var(--color-border)', background: p.patient_id === selectedPatientId ? 'var(--color-primary-light)' : '#fff', fontSize: 13 }}>
+                className={p.patient_id === selectedPatientId ? 'hms-btn hms-btn-primary' : 'hms-btn hms-btn-ghost'}
+                style={{ padding: '7px 14px' }}>
                 {p.first_name} {p.last_name}
               </button>
             ))}
@@ -142,15 +144,13 @@ export default function DoctorDashboard() {
             <div>
               <form onSubmit={submitDiagnosis} style={{ marginBottom: 20 }}>
                 <h4>Add Diagnosis</h4>
-                <textarea value={diagText} onChange={(e) => setDiagText(e.target.value)} rows={3}
-                  style={{ width: '100%', padding: 8, border: '1px solid var(--color-border)', borderRadius: 6, fontSize: 13 }} />
-                <button type="submit" style={btnStyle}>Save diagnosis</button>
+                <textarea className="hms-textarea" value={diagText} onChange={(e) => setDiagText(e.target.value)} rows={3} />
+                <button type="submit" className="hms-btn hms-btn-primary" style={{ marginTop: 10 }}>Save diagnosis</button>
               </form>
               <form onSubmit={submitLabOrder}>
                 <h4>Order Lab Test</h4>
-                <input value={labTestName} onChange={(e) => setLabTestName(e.target.value)} placeholder="e.g. Troponin-I"
-                  style={{ width: '100%', padding: 8, border: '1px solid var(--color-border)', borderRadius: 6, fontSize: 13 }} />
-                <button type="submit" style={btnStyle}>Order test</button>
+                <input className="hms-input" value={labTestName} onChange={(e) => setLabTestName(e.target.value)} placeholder="e.g. Troponin-I" />
+                <button type="submit" className="hms-btn hms-btn-primary" style={{ marginTop: 10 }}>Order test</button>
               </form>
               {formMsg && <div style={{ marginTop: 10, fontSize: 13, color: 'var(--color-success)' }}>{formMsg}</div>}
             </div>
@@ -161,6 +161,5 @@ export default function DoctorDashboard() {
   );
 }
 
-const btnStyle = { marginTop: 8, padding: '7px 14px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 600 };
 function Th({ children }) { return <th style={{ textAlign: 'left', fontSize: 12, color: 'var(--color-text-muted)', padding: '4px 8px 8px 0' }}>{children}</th>; }
 function Td({ children }) { return <td style={{ fontSize: 13, padding: '8px 8px 8px 0', borderTop: '1px solid var(--color-border)' }}>{children}</td>; }

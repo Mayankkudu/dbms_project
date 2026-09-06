@@ -14,4 +14,9 @@ router.post('/prescriptions', authorize('DOCTOR'), asyncHandler(clinicalControll
 router.get('/pharmacy/pending', authorize('PHARMACIST', 'ADMIN'), asyncHandler(clinicalController.pendingDispensing));
 router.patch('/pharmacy/items/:itemId', authorize('PHARMACIST'), asyncHandler(clinicalController.updateDispensedStatus));
 
+// Capstone features
+router.get('/timeline/:patientId', authorize('DOCTOR', 'NURSE', 'PATIENT'), asyncHandler(clinicalController.getPatientTimeline));
+router.post('/interventions', authorize('DOCTOR', 'NURSE'), asyncHandler(clinicalController.addInterventionNote));
+router.get('/handoff/:patientId', authorize('DOCTOR', 'NURSE'), asyncHandler(clinicalController.getShiftHandoffSummary));
+
 module.exports = router;

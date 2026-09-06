@@ -10,6 +10,7 @@ import WardBoyDashboard from './pages/WardBoyDashboard';
 import PharmacistDashboard from './pages/PharmacistDashboard';
 import LabDashboard from './pages/LabDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminList from './pages/AdminList';
 import { ROLE_HOME } from './utils/roles';
 
 function RootRedirect() {
@@ -49,6 +50,9 @@ export default function App() {
           } />
           <Route path="/admin/dashboard" element={
             <ProtectedRoute allowedRoles={['ADMIN']}><AdminDashboard /></ProtectedRoute>
+          } />
+          <Route path="/admin/list/:type" element={
+            <ProtectedRoute allowedRoles={['ADMIN']}><AdminList /></ProtectedRoute>
           } />
 
           <Route path="*" element={<Navigate to="/" replace />} />

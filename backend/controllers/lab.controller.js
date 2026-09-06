@@ -21,14 +21,14 @@ async function listPending(req, res) {
 }
 
 async function submitReport(req, res) {
-  const { resultSummary, fileUrl } = req.body;
+  const { resultSummary, fileUrl, isCritical } = req.body;
   if (!resultSummary) {
     return res.status(400).json({ error: 'resultSummary is required' });
   }
 
   try {
     const report = await labService.submitReport({
-      labTestId: req.params.labTestId, performedBy: req.user.personId, resultSummary, fileUrl,
+      labTestId: req.params.labTestId, performedBy: req.user.personId, resultSummary, fileUrl, isCritical
     });
 
     await writeAuditLog({
@@ -44,4 +44,17 @@ async function submitReport(req, res) {
   }
 }
 
-module.exports = { orderTest, listPending, submitReport };
+async function acknowledgeCriticalLab(req, res) {
+  const { labReportId } = req.params;
+  await labService.acknowledgeCriticalLab(labReportId);
+  
+  await writeAuditLog({
+    userId: req.user.userId, roleName: req.user.role, action: 'UPDATE',
+    tableName: 'lab_reports', recordId: labReportId,
+    fieldName: 'acknowledged_at', oldValue: null, newValue: 'NOW()',
+  });
+
+  res.status(200).json({ message: 'Critical lab acknowledged' });
+}
+
+module.exports = { orderTest, listPending, submitReport, acknowledgeCriticalLab };

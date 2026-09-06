@@ -7,11 +7,16 @@ import { adminApi } from '../services/resources';
 export default function AdminDashboard() {
   const [data, setData] = useState(null);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [opsMetrics, setOpsMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([adminApi.analytics(), adminApi.auditLogs(30)])
-      .then(([a, l]) => { setData(a.data); setAuditLogs(l.data); })
+    Promise.all([
+      adminApi.analytics(), 
+      adminApi.auditLogs(30),
+      fetch('/api/admin/operations-metrics', {headers: {Authorization: `Bearer ${localStorage.getItem('token')}`}}).then(res => res.json())
+    ])
+      .then(([a, l, om]) => { setData(a.data); setAuditLogs(l.data); setOpsMetrics(om); })
       .finally(() => setLoading(false));
   }, []);
 
@@ -22,14 +27,21 @@ export default function AdminDashboard() {
   return (
     <DashboardLayout title="Admin Dashboard">
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 20 }}>
-        <StatCard label="Total Patients" value={summary.totalPatients} />
-        <StatCard label="Active Admissions" value={summary.activeAdmissions} tone="primary" />
-        <StatCard label="Available Beds" value={summary.availableBeds} tone="success" />
-        <StatCard label="Today's Appointments" value={summary.todaysAppointments} />
-        <StatCard label="Critical Alerts (Open)" value={summary.openCriticalAlerts} tone="critical" />
-        <StatCard label="Total Staff" value={summary.totalStaff} />
-        <StatCard label="Pending Lab Tests" value={summary.pendingLabTests} tone="warning" />
-        <StatCard label="Pending Bills" value={summary.pendingBills} tone="warning" />
+        <StatCard label="Total Patients" value={summary.totalPatients} to="/admin/list/patients" />
+        <StatCard label="Active Admissions" value={summary.activeAdmissions} tone="primary" to="/admin/list/active-admissions" />
+        <StatCard label="Available Beds" value={summary.availableBeds} tone="success" to="/admin/list/available-beds" />
+        <StatCard label="Today's Appointments" value={summary.todaysAppointments} to="/admin/list/todays-appointments" />
+        <StatCard label="Critical Alerts (Open)" value={summary.openCriticalAlerts} tone="critical" to="/admin/list/open-alerts" />
+        <StatCard label="Total Staff" value={summary.totalStaff} to="/admin/list/staff" />
+        <StatCard label="Pending Lab Tests" value={summary.pendingLabTests} tone="warning" to="/admin/list/pending-labs" />
+        <StatCard label="Pending Bills" value={summary.pendingBills} tone="warning" to="/admin/list/pending-bills" />
+        
+        {opsMetrics && (
+          <>
+            <StatCard label="Avg Turnaround (Hrs)" value={parseFloat(opsMetrics.avgTurnaroundHours).toFixed(1)} tone="primary" />
+            <StatCard label="SLA Breaches" value={opsMetrics.slaBreachCount} tone={opsMetrics.slaBreachCount > 0 ? 'critical' : 'success'} />
+          </>
+        )}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>

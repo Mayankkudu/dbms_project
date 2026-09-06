@@ -100,9 +100,15 @@ table { border-collapse: collapse; width: 100%; }
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   padding: 22px;
-  transition: box-shadow 220ms var(--ease), transform 220ms var(--ease), border-color 220ms var(--ease);
+  transition: box-shadow 220ms var(--ease), transform 220ms var(--ease), border-color 220ms var(--ease), background-color 220ms var(--ease);
 }
 .hms-card:hover { box-shadow: var(--shadow-md); }
+
+.stat-card-link:hover, .stat-card-link:focus-visible {
+  transform: translateY(-2px);
+  background-color: var(--color-surface-alt);
+  border-color: var(--color-accent);
+}
 
 .hms-input, .hms-textarea, .hms-select {
   width: 100%;

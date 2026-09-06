@@ -80,4 +80,34 @@ async function updateDispensedStatus(itemId, status) {
   return rows[0] || null;
 }
 
-module.exports = { createDiagnosis, createPrescription, getPendingDispensingItems, updateDispensedStatus };
+async function getPatientTimeline(patientId) {
+  const [rows] = await pool.query(`
+    SELECT 'VITAL' as type, recorded_at as timestamp, CONCAT('Score: ', risk_score, ' (', risk_level, ')') as detail
+    FROM vital_records WHERE patient_id = ?
+    UNION ALL
+    SELECT 'ALERT' as type, generated_at as timestamp, CONCAT(severity, ': ', message) as detail
+    FROM critical_alerts WHERE patient_id = ?
+    UNION ALL
+    SELECT 'INTERVENTION' as type, i.created_at as timestamp, i.notes as detail
+    FROM intervention_notes i
+    JOIN critical_alerts a ON i.alert_id = a.alert_id 
+    WHERE a.patient_id = ?
+    UNION ALL
+    SELECT 'LAB' as type, r.completed_at as timestamp, r.result_summary as detail
+    FROM lab_reports r
+    JOIN lab_tests t ON r.lab_test_id = t.lab_test_id
+    WHERE t.patient_id = ?
+    ORDER BY timestamp DESC
+  `, [patientId, patientId, patientId, patientId]);
+  return rows;
+}
+
+async function addInterventionNote({ alertId, doctorId, notes }) {
+  const [result] = await pool.query(
+    `INSERT INTO intervention_notes (alert_id, doctor_id, notes) VALUES (?, ?, ?)`,
+    [alertId, doctorId, notes]
+  );
+  return { intervention_id: result.insertId, alertId, doctorId, notes };
+}
+
+module.exports = { createDiagnosis, createPrescription, getPendingDispensingItems, updateDispensedStatus, getPatientTimeline, addInterventionNote };

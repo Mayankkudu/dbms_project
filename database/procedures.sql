@@ -134,4 +134,24 @@ BEGIN
     SET out_bill_id = LAST_INSERT_ID();
 END$$
 
+-- ----------------------------------------------------------------------------
+-- CheckSLAEscalations: sweep alerts and escalate
+-- ----------------------------------------------------------------------------
+CREATE PROCEDURE CheckSLAEscalations()
+BEGIN
+    UPDATE critical_alerts 
+    SET escalation_level = escalation_level + 1 
+    WHERE status = 'OPEN' AND sla_deadline < NOW() AND escalation_level < 3;
+END$$
+
+-- ----------------------------------------------------------------------------
+-- MarkBedAvailable: finish cleaning
+-- ----------------------------------------------------------------------------
+CREATE PROCEDURE MarkBedAvailable(IN p_bed_id INT)
+BEGIN
+    UPDATE beds 
+    SET status = 'AVAILABLE', available_at = NOW() 
+    WHERE bed_id = p_bed_id AND status = 'CLEANING';
+END$$
+
 DELIMITER ;

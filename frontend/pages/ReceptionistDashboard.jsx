@@ -4,6 +4,7 @@ import { Card, LoadingState, EmptyState } from '../components/Common';
 import StatusBadge from '../components/StatusBadge';
 import { patientApi, appointmentApi, admissionApi } from '../services/resources';
 import api from '../services/api';
+import BedCommandCenter from '../components/BedCommandCenter';
 
 export default function ReceptionistDashboard() {
   const [beds, setBeds] = useState([]);
@@ -178,8 +179,11 @@ export default function ReceptionistDashboard() {
             </form>
           </div>
         )}
+        )}
         {msg && <div style={{ marginTop: 14, fontSize: 13, color: 'var(--color-primary)' }}>{msg}</div>}
       </Card>
+
+      <BedCommandCenter token={localStorage.getItem('token')} />
     </DashboardLayout>
   );
 }

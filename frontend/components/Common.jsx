@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export function Card({ title, subtitle, action, children, style, className = '' }) {
   return (
     <div className={`hms-card hms-fade-in ${className}`} style={style}>
@@ -23,10 +25,10 @@ const TONE_COLORS = {
   info: { fg: 'var(--color-info)', bg: 'var(--color-info-light)' },
 };
 
-export function StatCard({ label, value, tone = 'primary', icon, hint }) {
+export function StatCard({ label, value, tone = 'primary', icon, hint, to, onClick }) {
   const c = TONE_COLORS[tone] || TONE_COLORS.primary;
-  return (
-    <div className="hms-card hms-fade-in" style={{ minWidth: 150, position: 'relative', overflow: 'hidden' }}>
+  const content = (
+    <>
       <div style={{
         position: 'absolute', top: -18, right: -18, width: 72, height: 72, borderRadius: '50%',
         background: c.bg, opacity: 0.7,
@@ -50,6 +52,22 @@ export function StatCard({ label, value, tone = 'primary', icon, hint }) {
           </div>
         )}
       </div>
+    </>
+  );
+
+  const style = { minWidth: 150, position: 'relative', overflow: 'hidden', textDecoration: 'none', color: 'inherit', display: 'block', outline: 'none', cursor: (to || onClick) ? 'pointer' : 'default' };
+
+  if (to) {
+    return (
+      <Link to={to} className="hms-card hms-fade-in stat-card-link" style={style}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <div className={`hms-card hms-fade-in ${(to || onClick) ? 'stat-card-link' : ''}`} style={style} onClick={onClick} role={onClick ? "button" : undefined} tabIndex={onClick ? 0 : undefined} onKeyDown={(e) => { if(onClick && (e.key === 'Enter' || e.key === ' ')) onClick(); }}>
+      {content}
     </div>
   );
 }

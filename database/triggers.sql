@@ -26,7 +26,7 @@ AFTER UPDATE ON admissions
 FOR EACH ROW
 BEGIN
     IF OLD.status = 'ACTIVE' AND NEW.status = 'DISCHARGED' THEN
-        UPDATE beds SET status = 'AVAILABLE' WHERE bed_id = NEW.bed_id;
+        UPDATE beds SET status = 'CLEANING', cleaning_started_at = NOW() WHERE bed_id = NEW.bed_id;
         UPDATE patients SET current_status = 'DISCHARGED' WHERE patient_id = NEW.patient_id;
 
         INSERT INTO audit_logs (user_id, role_name, action, table_name, record_id, field_name, old_value, new_value)
@@ -68,6 +68,7 @@ BEGIN
         SET v_score = v_score + 2;
     END IF;
 
+    SET NEW.early_warning_score = v_score;
     SET NEW.risk_score = v_score;
     SET NEW.risk_level = CASE
         WHEN v_score >= 7 THEN 'CRITICAL'
@@ -103,13 +104,14 @@ BEGIN
             SET v_reason = CONCAT(v_reason, 'Respiratory rate outside 10-24/min (demo threshold). ');
         END IF;
 
-        INSERT INTO critical_alerts (patient_id, vital_id, severity, message)
+        INSERT INTO critical_alerts (patient_id, vital_id, severity, message, sla_deadline)
         VALUES (
             NEW.patient_id,
             NEW.vital_id,
             NEW.risk_level,
             CONCAT('Risk score ', NEW.risk_score, ' (', NEW.risk_level, '). Reasons: ', v_reason,
-                   'Demo/educational thresholds only — not a medical diagnosis.')
+                   'Demo/educational thresholds only — not a medical diagnosis.'),
+            DATE_ADD(NOW(), INTERVAL 15 MINUTE)
         );
     END IF;
 END$$

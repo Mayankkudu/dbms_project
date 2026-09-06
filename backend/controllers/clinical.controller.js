@@ -1,5 +1,6 @@
 const clinicalService = require('../services/clinical.service');
 const { writeAuditLog } = require('../services/audit.service');
+const aiService = require('../services/ai.service');
 
 async function createDiagnosis(req, res) {
   const { patientId, admissionId, diagnosisText } = req.body;
@@ -61,4 +62,48 @@ async function updateDispensedStatus(req, res) {
   res.json(item);
 }
 
-module.exports = { createDiagnosis, createPrescription, pendingDispensing, updateDispensedStatus };
+async function getPatientTimeline(req, res) {
+  const { patientId } = req.params;
+  const timeline = await clinicalService.getPatientTimeline(patientId);
+  res.json(timeline);
+}
+
+async function addInterventionNote(req, res) {
+  const { alertId, notes } = req.body;
+  if (!alertId || !notes) {
+    return res.status(400).json({ error: 'alertId and notes are required' });
+  }
+  const note = await clinicalService.addInterventionNote({
+    alertId,
+    doctorId: req.user.personId,
+    notes
+  });
+  
+  await writeAuditLog({
+    userId: req.user.userId, roleName: req.user.role, action: 'INSERT',
+    tableName: 'intervention_notes', recordId: note.intervention_id,
+  });
+
+  res.status(201).json(note);
+}
+
+async function getShiftHandoffSummary(req, res) {
+  const { patientId } = req.params;
+  const timeline = await clinicalService.getPatientTimeline(patientId);
+  
+  const staffName = req.user.username;
+  const summary = await aiService.generateShiftHandoff(timeline, staffName);
+  
+  await writeAuditLog({
+    userId: req.user.userId, roleName: req.user.role, action: 'INSERT',
+    tableName: 'shift_handoffs', recordId: patientId, // simplified
+  });
+
+  res.json(summary);
+}
+
+module.exports = { 
+  createDiagnosis, createPrescription, pendingDispensing, 
+  updateDispensedStatus, getPatientTimeline, addInterventionNote, 
+  getShiftHandoffSummary 
+};

@@ -31,14 +31,15 @@ async function listPendingTests() {
  * Creates the lab_reports row and flips the parent lab_tests.status to
  * COMPLETED, as one transaction.
  */
-async function submitReport({ labTestId, performedBy, resultSummary, fileUrl = null }) {
+async function submitReport({ labTestId, performedBy, resultSummary, fileUrl = null, isCritical = false }) {
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
 
+    const deadlineClause = isCritical ? 'DATE_ADD(NOW(), INTERVAL 30 MINUTE)' : 'NULL';
     await conn.query(
-      `INSERT INTO lab_reports (lab_test_id, performed_by, result_summary, file_url) VALUES (?, ?, ?, ?)`,
-      [labTestId, performedBy, resultSummary, fileUrl]
+      `INSERT INTO lab_reports (lab_test_id, performed_by, result_summary, file_url, is_critical, sla_deadline) VALUES (?, ?, ?, ?, ?, ${deadlineClause})`,
+      [labTestId, performedBy, resultSummary, fileUrl, isCritical]
     );
     await conn.query(`UPDATE lab_tests SET status = 'COMPLETED' WHERE lab_test_id = ?`, [labTestId]);
 
@@ -59,4 +60,8 @@ async function submitReport({ labTestId, performedBy, resultSummary, fileUrl = n
   }
 }
 
-module.exports = { orderTest, listPendingTests, submitReport };
+async function acknowledgeCriticalLab(labReportId) {
+  await pool.query(`UPDATE lab_reports SET acknowledged_at = NOW() WHERE lab_report_id = ?`, [labReportId]);
+}
+
+module.exports = { orderTest, listPendingTests, submitReport, acknowledgeCriticalLab };

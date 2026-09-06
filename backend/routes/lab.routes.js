@@ -15,4 +15,7 @@ router.post('/', authorize('DOCTOR'), asyncHandler(labController.orderTest));
 router.get('/pending', authorize('LAB_TECHNICIAN', 'ADMIN'), asyncHandler(labController.listPending));
 router.post('/:labTestId/report', authorize('LAB_TECHNICIAN'), asyncHandler(labController.submitReport));
 
+// Capstone: acknowledge critical lab
+router.patch('/reports/:labReportId/acknowledge', authorize('DOCTOR'), asyncHandler(labController.acknowledgeCriticalLab));
+
 module.exports = router;

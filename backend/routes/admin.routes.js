@@ -20,4 +20,18 @@ router.get('/audit-logs', asyncHandler(async (req, res) => {
   res.json(await adminService.getAuditLogs({ limit: req.query.limit }));
 }));
 
+// Capstone: Operations Metrics
+router.get('/operations-metrics', asyncHandler(async (req, res) => {
+  res.json(await adminService.getOperationsMetrics());
+}));
+
+// Capstone: Bed Command Center
+router.get('/bed-command-center', asyncHandler(async (req, res) => {
+  res.json(await adminService.getBedCommandCenter());
+}));
+
+router.get('/list/:type', asyncHandler(async (req, res) => {
+  res.json(await adminService.getList(req.params.type));
+}));
+
 module.exports = router;

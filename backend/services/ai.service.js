@@ -87,4 +87,50 @@ Deterministic reasoning: ${alert.message}`;
   }
 }
 
-module.exports = { explainAlert, deterministicExplanation };
+async function generateShiftHandoff(timelineData, staffName) {
+  const fallback = { summary: 'AI summary disabled or unavailable. Please review timeline manually.', source: 'deterministic' };
+
+  if (!AI_ENABLED || !API_KEY) return fallback;
+
+  try {
+    const prompt = `You are a clinical AI assistant generating a shift handoff summary (SBAR format) for ${staffName}.
+Below is verified chronological data from the hospital system. 
+Summarize the situation, background, assessment, and recommendations.
+Keep it strictly grounded in the provided data. Do not invent any diagnoses or treatments.
+Include a disclaimer that clinician review is required.
+
+Timeline Data:
+${JSON.stringify(timelineData, null, 2)}`;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 500,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (!response.ok) return fallback;
+
+    const data = await response.json();
+    const textBlock = (data.content || []).find((b) => b.type === 'text');
+    if (!textBlock || !textBlock.text) return fallback;
+
+    return { summary: textBlock.text.trim(), source: 'ai' };
+  } catch (err) {
+    return fallback;
+  }
+}
+
+module.exports = { explainAlert, deterministicExplanation, generateShiftHandoff };

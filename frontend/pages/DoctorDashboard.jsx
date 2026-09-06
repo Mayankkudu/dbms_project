@@ -5,6 +5,8 @@ import StatusBadge from '../components/StatusBadge';
 import CriticalAlertCard from '../components/CriticalAlertCard';
 import { useAuth } from '../context/AuthContext';
 import { appointmentApi, vitalApi, patientApi, clinicalApi, labApi } from '../services/resources';
+import PatientTimeline from '../components/PatientTimeline';
+import ShiftHandoff from '../components/ShiftHandoff';
 
 export default function DoctorDashboard() {
   const { user } = useAuth();
@@ -140,6 +142,9 @@ export default function DoctorDashboard() {
                   ))}
                 </ul>
               )}
+              
+              <PatientTimeline patientId={selectedPatientId} token={localStorage.getItem('token')} />
+              <ShiftHandoff patientId={selectedPatientId} token={localStorage.getItem('token')} />
             </div>
             <div>
               <form onSubmit={submitDiagnosis} style={{ marginBottom: 20 }}>
@@ -151,6 +156,23 @@ export default function DoctorDashboard() {
                 <h4>Order Lab Test</h4>
                 <input className="hms-input" value={labTestName} onChange={(e) => setLabTestName(e.target.value)} placeholder="e.g. Troponin-I" />
                 <button type="submit" className="hms-btn hms-btn-primary" style={{ marginTop: 10 }}>Order test</button>
+              </form>
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const alertId = prompt("Enter Alert ID:");
+                const notes = prompt("Enter Intervention Notes:");
+                if(alertId && notes) {
+                   await fetch('/api/clinical/interventions', {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+                     body: JSON.stringify({ alertId: parseInt(alertId), notes })
+                   });
+                   alert('Intervention logged.');
+                   selectPatient(selectedPatientId);
+                }
+              }}>
+                <h4>Log Intervention</h4>
+                <button type="submit" className="hms-btn hms-btn-ghost" style={{ marginTop: 10 }}>Add Note for Alert</button>
               </form>
               {formMsg && <div style={{ marginTop: 10, fontSize: 13, color: 'var(--color-success)' }}>{formMsg}</div>}
             </div>

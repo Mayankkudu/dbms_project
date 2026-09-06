@@ -211,6 +211,8 @@ CREATE TABLE beds (
     bed_no      VARCHAR(20) NOT NULL,
     -- derived/cached attribute, synced by trigger on admissions insert/discharge
     status      ENUM('AVAILABLE','OCCUPIED','CLEANING','MAINTENANCE') NOT NULL DEFAULT 'AVAILABLE',
+    cleaning_started_at DATETIME NULL,
+    available_at DATETIME NULL,
     CONSTRAINT fk_bed_room FOREIGN KEY (room_id)
         REFERENCES rooms(room_id) ON DELETE CASCADE,
     UNIQUE KEY uq_bed_per_room (room_id, bed_no)
@@ -247,6 +249,7 @@ CREATE TABLE admissions (
     admitting_doctor_id CHAR(36) NOT NULL,
     admitted_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     discharged_at   DATETIME NULL,
+    predicted_discharge_date DATETIME NULL,
     reason          VARCHAR(255) NULL,
     status          ENUM('ACTIVE','DISCHARGED') NOT NULL DEFAULT 'ACTIVE',
     CONSTRAINT fk_admission_patient FOREIGN KEY (patient_id) REFERENCES patients(patient_id) ON DELETE CASCADE,
@@ -272,6 +275,7 @@ CREATE TABLE vital_records (
     respiratory_rate      TINYINT NULL,
     blood_glucose        SMALLINT NULL,
     -- risk fields populated by the analysis layer at insert time (explainable, not AI-only)
+    early_warning_score  TINYINT NULL,
     risk_score      TINYINT NULL,
     risk_level      ENUM('NORMAL','MONITOR','HIGH','CRITICAL') NULL,
     CONSTRAINT fk_vital_patient  FOREIGN KEY (patient_id)  REFERENCES patients(patient_id) ON DELETE CASCADE,
@@ -293,6 +297,9 @@ CREATE TABLE critical_alerts (
     status          ENUM('OPEN','ACKNOWLEDGED') NOT NULL DEFAULT 'OPEN',
     acknowledged_by CHAR(36) NULL,
     acknowledged_at TIMESTAMP NULL,
+    sla_deadline    TIMESTAMP NULL,
+    escalation_level INT NOT NULL DEFAULT 0,
+    escalated_to    CHAR(36) NULL,
     CONSTRAINT fk_alert_patient FOREIGN KEY (patient_id) REFERENCES patients(patient_id) ON DELETE CASCADE,
     CONSTRAINT fk_alert_vital   FOREIGN KEY (vital_id)   REFERENCES vital_records(vital_id) ON DELETE CASCADE,
     CONSTRAINT fk_alert_ackby   FOREIGN KEY (acknowledged_by) REFERENCES staff(staff_id)
@@ -368,6 +375,9 @@ CREATE TABLE lab_reports (
     result_summary  VARCHAR(1000) NOT NULL,
     file_url        VARCHAR(255) NULL,
     completed_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_critical     BOOLEAN NOT NULL DEFAULT FALSE,
+    sla_deadline    TIMESTAMP NULL,
+    acknowledged_at TIMESTAMP NULL,
     CONSTRAINT fk_report_test FOREIGN KEY (lab_test_id) REFERENCES lab_tests(lab_test_id) ON DELETE CASCADE,
     CONSTRAINT fk_report_tech FOREIGN KEY (performed_by) REFERENCES lab_technicians(lab_technician_id)
 ) ENGINE=InnoDB;
@@ -431,6 +441,29 @@ CREATE TABLE audit_logs (
     new_value       VARCHAR(255) NULL,
     logged_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES user_accounts(user_id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------------------------------
+-- 15. INTERVENTIONS & SHIFT HANDOFFS (CAPSTONE)
+-- ----------------------------------------------------------------------------
+CREATE TABLE intervention_notes (
+    intervention_id INT AUTO_INCREMENT PRIMARY KEY,
+    alert_id        INT NOT NULL,
+    doctor_id       CHAR(36) NOT NULL,
+    notes           VARCHAR(1000) NOT NULL,
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_intervention_alert FOREIGN KEY (alert_id) REFERENCES critical_alerts(alert_id) ON DELETE CASCADE,
+    CONSTRAINT fk_intervention_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE shift_handoffs (
+    handoff_id      INT AUTO_INCREMENT PRIMARY KEY,
+    generated_for   CHAR(36) NOT NULL,
+    shift_date      DATE NOT NULL,
+    summary_text    TEXT NOT NULL,
+    reviewed_at     TIMESTAMP NULL,
+    generated_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_handoff_staff FOREIGN KEY (generated_for) REFERENCES staff(staff_id)
 ) ENGINE=InnoDB;
 
 SET FOREIGN_KEY_CHECKS = 1;

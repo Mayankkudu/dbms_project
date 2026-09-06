@@ -45,3 +45,15 @@ async function pay(billId, { amountPaid, paymentMethod }) {
   } catch (e) { await conn.rollback(); throw e; } finally { conn.release(); }
 }
 module.exports = { createBill, getBill, listForPatient, pay };
+
+async function getPendingBills() {
+  const [rows] = await pool.query(`
+    SELECT b.*, p.first_name, p.last_name 
+    FROM bills b 
+    JOIN patients p ON b.patient_id = p.patient_id 
+    WHERE b.status IN ('PENDING', 'PARTIAL') 
+    ORDER BY b.generated_at ASC
+  `);
+  return rows;
+}
+module.exports.getPendingBills = getPendingBills;

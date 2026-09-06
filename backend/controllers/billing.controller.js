@@ -27,3 +27,8 @@ async function pay(req, res) {
   res.status(201).json(payment);
 }
 module.exports = { createBill, getBill, listForPatient, pay };
+
+exports.getPending = async (req, res) => {
+  const bills = await billingService.getPendingBills();
+  res.json(bills);
+};

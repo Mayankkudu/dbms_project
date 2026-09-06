@@ -51,3 +51,16 @@ async function updateStatus(appointmentId, status) {
 }
 
 module.exports = { bookAppointment, listForPatient, listForDoctor, listDoctors, updateStatus };
+
+async function getTodayAppointments() {
+  const [rows] = await pool.query(`
+    SELECT a.*, p.first_name, p.last_name, d.first_name as doc_first, d.last_name as doc_last
+    FROM appointments a
+    JOIN patients p ON a.patient_id = p.patient_id
+    JOIN persons d ON a.doctor_id = d.person_id
+    WHERE CAST(a.scheduled_at AS DATE) = CURRENT_DATE
+    ORDER BY a.scheduled_at ASC
+  `);
+  return rows;
+}
+module.exports.getTodayAppointments = getTodayAppointments;

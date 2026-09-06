@@ -4,7 +4,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth.middleware');
 const adminService = require('../services/admin.service');
 
-router.use(authenticate, authorize('ADMIN'));
+router.use(authenticate, authorize('ADMIN', 'RECEPTIONIST'));
 
 router.get('/analytics', asyncHandler(async (req, res) => {
   const [summary, registrations, byDepartment, alertsOverTime] = await Promise.all([

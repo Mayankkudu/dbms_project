@@ -135,6 +135,41 @@ BEGIN
 END$$
 
 -- ----------------------------------------------------------------------------
+-- add_insurance_policy: register a new policy for a patient, deactivating
+-- any previously active policy for the same patient first (a patient should
+-- have at most one ACTIVE policy at a time).
+-- ----------------------------------------------------------------------------
+CREATE PROCEDURE add_insurance_policy(
+    IN p_patient_id CHAR(36), IN p_provider_name VARCHAR(120),
+    IN p_policy_number VARCHAR(60), IN p_policy_type VARCHAR(20),
+    IN p_coverage_amount DECIMAL(12,2), IN p_coverage_percent TINYINT,
+    IN p_valid_from DATE, IN p_valid_till DATE,
+    OUT out_policy_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE insurance_policies SET is_active = FALSE
+    WHERE patient_id = p_patient_id AND is_active = TRUE;
+
+    INSERT INTO insurance_policies
+        (patient_id, provider_name, policy_number, policy_type,
+         coverage_amount, coverage_percent, valid_from, valid_till)
+    VALUES
+        (p_patient_id, p_provider_name, p_policy_number, p_policy_type,
+         p_coverage_amount, p_coverage_percent, p_valid_from, p_valid_till);
+
+    SET out_policy_id = LAST_INSERT_ID();
+    COMMIT;
+END$$
+
+-- ----------------------------------------------------------------------------
 -- CheckSLAEscalations: sweep alerts and escalate
 -- ----------------------------------------------------------------------------
 CREATE PROCEDURE CheckSLAEscalations()

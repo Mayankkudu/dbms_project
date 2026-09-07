@@ -26,4 +26,12 @@ api.interceptors.response.use(
   }
 );
 
+// Pharmacist API endpoints
+export const pharmacistAPI = {
+  getInventory: () => api.get('/pharmacist/inventory'),
+  updateStock: (id, stock_quantity) => api.put(`/pharmacist/inventory/${id}`, { stock_quantity }),
+  getPrescriptions: () => api.get('/pharmacist/prescriptions'),
+  getPrescriptionById: (id) => api.get(`/pharmacist/prescriptions/${id}`)
+};
+
 export default api;

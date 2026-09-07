@@ -16,7 +16,7 @@ const notificationRoutes = require('./routes/notification.routes');
 const adminRoutes = require('./routes/admin.routes');
 const statsRoutes = require('./routes/stats.routes');
 const queueRoutes = require('./routes/queue.routes');
-const pharmacistRoutes = require('./routes/pharmacist.routes.js');
+const insuranceRoutes = require('./routes/insurance.routes');
 
 const app = express();
 
@@ -39,7 +39,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/queue', queueRoutes);
-app.use('/api/pharmacist', pharmacistRoutes);
+app.use('/api/insurance', insuranceRoutes);
 
 // Central error handler — catches anything thrown/rejected in async
 // controllers that isn't already handled, so the API never leaks a stack

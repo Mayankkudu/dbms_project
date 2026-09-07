@@ -7,10 +7,7 @@ import { TodayAppointments } from '../components/TodayAppointments';
 import { WaitingQueue } from '../components/WaitingQueue';
 import { RecentActivity } from '../components/RecentActivity';
 import BedCommandCenter from '../components/BedCommandCenter';
-import { AssignBedForm } from '../components/AssignBedForm';
-import { AssignBedForm } from '../components/AssignBedForm';
-import { RegisterPatientForm } from '../components/RegisterPatientForm';
-import { AddToQueueForm } from '../components/AddToQueueForm';
+import { AddInsuranceForm } from '../components/AddInsuranceForm';
 import api from '../services/api';
 
 export default function ReceptionistDashboard() {
@@ -39,6 +36,7 @@ export default function ReceptionistDashboard() {
         <QuickActionCard label="Search Patient" icon="🔍" onClick={() => setModalType('search')} />
         <QuickActionCard label="Add to Queue" icon="🎟️" onClick={() => setModalType('queue')} />
         <QuickActionCard label="Assign Bed" icon="🛏️" onClick={() => setModalType('admit')} />
+        <QuickActionCard label="Add Insurance" icon="🛡️" onClick={() => setModalType('insurance')} />
       </div>
 
       {/* Main Panels */}
@@ -58,21 +56,29 @@ export default function ReceptionistDashboard() {
         </div>
       </div>
 
+      <div style={{ marginTop: 20 }}>
+        <BedCommandCenter token={localStorage.getItem('token')} />
+      </div>
+
       {/* Modals */}
       <Modal isOpen={modalType === 'search'} onClose={() => setModalType(null)} title="Search Patient">
         <PatientSearch onSelect={(p) => { alert('Selected ' + p.first_name); setModalType(null); }} />
       </Modal>
 
       <Modal isOpen={modalType === 'register'} onClose={() => setModalType(null)} title="Register Patient">
-        <RegisterPatientForm onSuccess={() => { alert("Patient Registered Successfully!"); setModalType(null); window.location.reload(); }} />
+        <EmptyState message="Registration form rendered here" icon="📋" />
       </Modal>
 
       <Modal isOpen={modalType === 'queue'} onClose={() => setModalType(null)} title="Add to Queue">
-        <AddToQueueForm onSuccess={() => { alert("Added to Queue!"); setModalType(null); window.location.reload(); }} />
+        <EmptyState message="Add to queue form rendered here" icon="🎟️" />
       </Modal>
 
       <Modal isOpen={modalType === 'admit'} onClose={() => setModalType(null)} title="Assign Bed">
-        <AssignBedForm onSuccess={() => { alert('Bed Assigned Successfully!'); setModalType(null); window.location.reload(); }} />
+        <EmptyState message="Admission form rendered here" icon="🛏️" />
+      </Modal>
+
+      <Modal isOpen={modalType === 'insurance'} onClose={() => setModalType(null)} title="Add Insurance Policy">
+        <AddInsuranceForm onDone={() => setModalType(null)} />
       </Modal>
 
     </DashboardLayout>

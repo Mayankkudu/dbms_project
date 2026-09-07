@@ -3,7 +3,7 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import { Card, LoadingState, EmptyState, ErrorState } from '../components/Common';
 import StatusBadge from '../components/StatusBadge';
 import { useAuth } from '../context/AuthContext';
-import { patientApi, appointmentApi, billingApi, notificationApi } from '../services/resources';
+import { patientApi, appointmentApi, billingApi, notificationApi, insuranceApi } from '../services/resources';
 
 export default function PatientDashboard() {
   const { user } = useAuth();
@@ -12,6 +12,7 @@ export default function PatientDashboard() {
   const [appointments, setAppointments] = useState([]);
   const [bills, setBills] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [policy, setPolicy] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -23,11 +24,15 @@ export default function PatientDashboard() {
       appointmentApi.listForPatient(user.personId),
       billingApi.listForPatient(user.personId),
       notificationApi.list(),
+      // A patient with no policy on file gets a 404 — that's a normal
+      // state here, not a dashboard-load failure, so it's handled locally
+      // rather than tripping the Promise.all's catch below.
+      insuranceApi.getActive(user.personId).catch(() => ({ data: null })),
     ])
-      .then(([p, h, a, b, n]) => {
+      .then(([p, h, a, b, n, ins]) => {
         if (!mounted) return;
         setProfile(p.data); setHistory(h.data); setAppointments(a.data);
-        setBills(b.data); setNotifications(n.data);
+        setBills(b.data); setNotifications(n.data); setPolicy(ins.data);
       })
       .catch(() => mounted && setError('Could not load your dashboard. Please try again.'))
       .finally(() => mounted && setLoading(false));
@@ -46,6 +51,18 @@ export default function PatientDashboard() {
           <InfoRow label="Email" value={profile.email || '—'} />
           <InfoRow label="Blood group" value={profile.blood_group || '—'} />
           <InfoRow label="City" value={profile.city || '—'} />
+        </Card>
+
+        <Card title="Insurance">
+          {!policy ? <EmptyState message="No insurance policy on file. Ask reception to add one." /> : (
+            <>
+              <InfoRow label="Provider" value={policy.provider_name} />
+              <InfoRow label="Policy number" value={policy.policy_number} />
+              <InfoRow label="Type" value={policy.policy_type} />
+              <InfoRow label="Coverage" value={`${policy.coverage_percent}% up to ₹${Number(policy.coverage_amount).toLocaleString()}`} />
+              <InfoRow label="Valid till" value={new Date(policy.valid_till).toLocaleDateString()} />
+            </>
+          )}
         </Card>
 
         <Card title="Notifications">

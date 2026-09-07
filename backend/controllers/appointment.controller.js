@@ -44,9 +44,9 @@ async function updateStatus(req, res) {
   res.json(appt);
 }
 
-module.exports = { book, listForPatient, listForDoctor, listDoctors, updateStatus };
+module.exports = { book, listForPatient, listForDoctor, listDoctors, updateStatus, getToday };
 
-exports.getToday = async (req, res) => {
+async function getToday(req, res) {
   const appts = await appointmentService.getTodayAppointments();
   res.json(appts);
 };

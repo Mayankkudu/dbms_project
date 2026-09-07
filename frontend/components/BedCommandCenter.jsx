@@ -1,3 +1,4 @@
+import api from '../services/api';
 import React, { useState, useEffect } from 'react';
 
 export default function BedCommandCenter({ token }) {
@@ -5,10 +6,7 @@ export default function BedCommandCenter({ token }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/admin/bed-command-center`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
+    api.get('/admin/bed-command-center').then(res => res.data)
       .then(data => {
         setBeds(data);
         setLoading(false);

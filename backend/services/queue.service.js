@@ -4,7 +4,7 @@ exports.getTodayQueue = async () => {
     const [rows] = await pool.query(`
         SELECT q.*, p.first_name, p.last_name, a.scheduled_at, d.first_name as doc_first, d.last_name as doc_last
         FROM waiting_queue q
-        JOIN patients p ON q.patient_id = p.patient_id
+        JOIN persons p ON q.patient_id = p.person_id
         LEFT JOIN appointments a ON q.appointment_id = a.appointment_id
         LEFT JOIN persons d ON a.doctor_id = d.person_id
         WHERE CAST(q.checkin_time AS DATE) = CURRENT_DATE

@@ -26,9 +26,9 @@ async function pay(req, res) {
   await writeAuditLog({ userId: req.user.userId, roleName: req.user.role, action: 'INSERT', tableName: 'payments', recordId: payment.payment_id });
   res.status(201).json(payment);
 }
-module.exports = { createBill, getBill, listForPatient, pay };
+module.exports = { createBill, getBill, listForPatient, pay, getPending };
 
-exports.getPending = async (req, res) => {
+async function getPending(req, res) {
   const bills = await billingService.getPendingBills();
   res.json(bills);
 };

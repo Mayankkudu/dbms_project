@@ -7,6 +7,10 @@ import { TodayAppointments } from '../components/TodayAppointments';
 import { WaitingQueue } from '../components/WaitingQueue';
 import { RecentActivity } from '../components/RecentActivity';
 import BedCommandCenter from '../components/BedCommandCenter';
+import { AssignBedForm } from '../components/AssignBedForm';
+import { AssignBedForm } from '../components/AssignBedForm';
+import { RegisterPatientForm } from '../components/RegisterPatientForm';
+import { AddToQueueForm } from '../components/AddToQueueForm';
 import api from '../services/api';
 
 export default function ReceptionistDashboard() {
@@ -54,25 +58,21 @@ export default function ReceptionistDashboard() {
         </div>
       </div>
 
-      <div style={{ marginTop: 20 }}>
-        <BedCommandCenter token={localStorage.getItem('token')} />
-      </div>
-
       {/* Modals */}
       <Modal isOpen={modalType === 'search'} onClose={() => setModalType(null)} title="Search Patient">
         <PatientSearch onSelect={(p) => { alert('Selected ' + p.first_name); setModalType(null); }} />
       </Modal>
 
       <Modal isOpen={modalType === 'register'} onClose={() => setModalType(null)} title="Register Patient">
-        <EmptyState message="Registration form rendered here" icon="📋" />
+        <RegisterPatientForm onSuccess={() => { alert("Patient Registered Successfully!"); setModalType(null); window.location.reload(); }} />
       </Modal>
 
       <Modal isOpen={modalType === 'queue'} onClose={() => setModalType(null)} title="Add to Queue">
-        <EmptyState message="Add to queue form rendered here" icon="🎟️" />
+        <AddToQueueForm onSuccess={() => { alert("Added to Queue!"); setModalType(null); window.location.reload(); }} />
       </Modal>
 
       <Modal isOpen={modalType === 'admit'} onClose={() => setModalType(null)} title="Assign Bed">
-        <EmptyState message="Admission form rendered here" icon="🛏️" />
+        <AssignBedForm onSuccess={() => { alert('Bed Assigned Successfully!'); setModalType(null); window.location.reload(); }} />
       </Modal>
 
     </DashboardLayout>

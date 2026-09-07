@@ -50,7 +50,7 @@ async function getPendingBills() {
   const [rows] = await pool.query(`
     SELECT b.*, p.first_name, p.last_name 
     FROM bills b 
-    JOIN patients p ON b.patient_id = p.patient_id 
+    JOIN persons p ON b.patient_id = p.person_id 
     WHERE b.status IN ('PENDING', 'PARTIAL') 
     ORDER BY b.generated_at ASC
   `);

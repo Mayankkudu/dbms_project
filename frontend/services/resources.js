@@ -60,6 +60,12 @@ export const notificationApi = {
   markRead: (id) => api.patch(`/notifications/${id}/read`),
 };
 
+export const insuranceApi = {
+  getActive: (patientId) => api.get(`/insurance/${patientId}`),
+  getHistory: (patientId) => api.get(`/insurance/${patientId}/history`),
+  add: (data) => api.post('/insurance', data),
+};
+
 export const adminApi = {
   analytics: () => api.get('/admin/analytics'),
   auditLogs: (limit) => api.get('/admin/audit-logs', { params: { limit } }),
